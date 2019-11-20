@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_restful import Api, Resource, reqparse, fields, marshal
+import os
 
 app = Flask(__name__)
 api = Api(app)
@@ -12,8 +13,8 @@ task_fields = {
     'uri': fields.Url('task')
 }
 
-tasks  = [
-     {
+tasks = [
+    {
         'id': 1,
         'title': u'Buy groceries',
         'description': u'Milk, Cheese, Pizza, Fruit, Tylenol',
@@ -26,6 +27,7 @@ tasks  = [
         'done': False
     }
 ]
+
 
 class TaskListAPI(Resource):
 
@@ -63,14 +65,13 @@ class TaskAPI(Resource):
     def get(self, id):
         task = [task for task in tasks if task['id'] == id]
         if len(task) == 0:
-            abort(404)
+            return {'result': '404'}
         return {'task': marshal(task[0], task_fields)}
-        
 
     def put(self, id):
         task = [task for task in tasks if task['id'] == id]
         if len(task) == 0:
-            abort(404)
+            return {'result': '404'}
         task = task[0]
         args = self.reqparse.parse_args()
         for k, v in args.items():
@@ -81,10 +82,14 @@ class TaskAPI(Resource):
     def delete(self, id):
         task = [task for task in tasks if task['id'] == id]
         if len(task) == 0:
-            abort(404)
+            return {'result': '404'}
         tasks.remove(task[0])
         return {'result': True}
 
 
 api.add_resource(TaskListAPI, '/tasks', endpoint='tasks')
 api.add_resource(TaskAPI, '/tasks/<int:id>', endpoint='task')
+
+if __name__ == '__main__':
+    app.run(host=os.getenv('LISTEN', '0.0.0.0'), port=int(
+        os.getenv('PORT', '8080')), debug=True)
