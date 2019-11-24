@@ -2,6 +2,7 @@ from flask import Flask
 from flask_restful import Api, Resource, reqparse, fields, marshal
 import os
 import requests
+import json
 
 
 app = Flask(__name__)
@@ -9,13 +10,14 @@ api = Api(app)
 
 
 task_fields = {
+    'id': fields.Integer,
     'title': fields.String,
     'description': fields.String,
     'done': fields.Boolean,
     'uri': fields.Url('task')
 }
 
-privateCloudIp = "http://3.135.154.4:8080"
+privateCloudIp = "http://3.135.123.239:8080"
 
 
 class TaskListAPI(Resource):
@@ -30,22 +32,25 @@ class TaskListAPI(Resource):
 
     def get(self):
         response = requests.get(privateCloudIp + "/tasks")
-        print(response.json())
-        return {"tasks": marshal(response.json, task_fields)}
+
+        return {"Response": response.json()}
 
     def post(self):
+
         args = self.reqparse.parse_args()
-        tasks = list(taskCollection.find())
+
         task = {
-            'id': tasks[-1]['id'] + 1 if len(tasks) > 0 else 1,
             'title': args['title'],
             'description': args['description'],
             'done': False
         }
-        taskCollection.insert_one(
-            task
-        )
-        return {'task': marshal(task, task_fields)}, 201
+
+        headers = {'content-type': 'application/json'}
+
+        response = requests.post(
+            privateCloudIp + "/tasks", data=json.dumps(task), headers=headers)
+
+        return {"Response": response.json()}, 201
 
 
 class TaskAPI(Resource):
@@ -53,36 +58,27 @@ class TaskAPI(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('title', type=str, location='json')
-        self.reqparse.add_argument('description', type=str, location='json')
+        self.reqparse.add_argument(
+            'description', type=str, location='json')
         self.reqparse.add_argument('done', type=bool, location='json')
         super(TaskAPI, self).__init__()
 
     def get(self, id):
-        tasks = list(taskCollection.find())
-        task = [task for task in tasks if task['id'] == id]
-        if len(task) == 0:
-            return {'result': '404'}
-        return {'task': marshal(task[0], task_fields)}
+        response = requests.get(privateCloudIp + "/tasks/{0}".format(id))
+        task = response.json()
+        return {'Reponse': task}
 
     def put(self, id):
-        tasks = list(taskCollection.find())
-        task = [task for task in tasks if task['id'] == id]
-        if len(task) == 0:
-            return {'result': '404'}
         args = self.reqparse.parse_args()
-        print(args)
-        for k, v in args.items():
-            if v is not None:
-                taskCollection.update_one({"id": id}, {"$set": {k: v}})
-        return {'task': marshal(task, task_fields)}
+        response = requests.put(privateCloudIp + "/tasks/{0}".format(id), args)
+        response = response.json()
+        return {'Response': response}
 
     def delete(self, id):
-        tasks = list(taskCollection.find())
-        task = [task for task in tasks if task['id'] == id]
-        if len(task) == 0:
-            return {'result': '404'}
-        taskCollection.delete_one({'id': id})
-        return {'result': True}
+
+        response = requests.delete(privateCloudIp + "/tasks/{0}".format(id))
+        response = response.json()
+        return {'Response': response}
 
 
 api.add_resource(TaskListAPI, '/tasks', endpoint='tasks')

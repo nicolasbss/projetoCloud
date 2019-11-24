@@ -78,7 +78,6 @@ class TaskAPI(Resource):
         if len(task) == 0:
             return {'result': '404'}
         args = self.reqparse.parse_args()
-        print(args)
         for k, v in args.items():
             if v is not None:
                 taskCollection.update_one({"id": id}, {"$set": {k: v}})
