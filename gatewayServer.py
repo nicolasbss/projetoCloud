@@ -1,30 +1,21 @@
 from flask import Flask
 from flask_restful import Api, Resource, reqparse, fields, marshal
 import os
-import pymongo
+import requests
 
-print(os.environ['mongoIp'])
-
-mongoServerIp = str(os.environ['mongoIp'])
-
-client = pymongo.MongoClient(
-    "mongodb://"+mongoServerIp+":27017")  # defaults to port 27017
-
-db = client['Projeto-Cloud']
-taskCollection = db['tasks']
-# taskCollection.drop()
 
 app = Flask(__name__)
 api = Api(app)
 
 
 task_fields = {
-    'id': fields.Integer,
     'title': fields.String,
     'description': fields.String,
     'done': fields.Boolean,
     'uri': fields.Url('task')
 }
+
+privateCloudIp = "http://3.135.154.4:8080"
 
 
 class TaskListAPI(Resource):
@@ -38,8 +29,9 @@ class TaskListAPI(Resource):
         super(TaskListAPI, self).__init__()
 
     def get(self):
-        tasks = list(taskCollection.find())
-        return {'tasks': [marshal(task, task_fields) for task in tasks]}
+        response = requests.get(privateCloudIp + "/tasks")
+        print(response.json())
+        return {"tasks": marshal(response.json, task_fields)}
 
     def post(self):
         args = self.reqparse.parse_args()
