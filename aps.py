@@ -4,7 +4,7 @@ import os
 import pymongo
 
 client = pymongo.MongoClient(
-    "mongodb://ip-172-31-92-137.ec2.internal:27017")  # defaults to port 27017
+    "mongodb://ip-172-31-82-229.ec2.internal:27017")  # defaults to port 27017
 
 db = client['Projeto-Cloud']
 taskCollection = db['tasks']
