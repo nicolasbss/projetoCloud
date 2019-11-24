@@ -3,8 +3,12 @@ from flask_restful import Api, Resource, reqparse, fields, marshal
 import os
 import pymongo
 
+print(os.environ['mongoIp'])
+
+mongoServerIp = str(os.environ['mongoIp'])
+
 client = pymongo.MongoClient(
-    "mongodb://ip-172-31-90-248.ec2.internal:27017")  # defaults to port 27017
+    "mongodb://"+mongoServerIp+":27017")  # defaults to port 27017
 
 db = client['Projeto-Cloud']
 taskCollection = db['tasks']
