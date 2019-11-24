@@ -3,6 +3,8 @@ from flask_restful import Api, Resource, reqparse, fields, marshal
 import os
 import pymongo
 
+print(os.environ['mongoIp'])
+
 mongoServerIp = str(os.environ['mongoIp'])
 
 client = pymongo.MongoClient(
