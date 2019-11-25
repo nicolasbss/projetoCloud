@@ -15,7 +15,7 @@ task_fields = {
     'uri': fields.Url('task')
 }
 
-gatewayServerIp = "http://3.234.79.32:8080"
+gatewayServerIp = "http://ip-172-31-83-61.ec2.internal:8080"
 
 
 class TaskListAPI(Resource):
