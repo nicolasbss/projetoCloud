@@ -17,7 +17,9 @@ task_fields = {
     'uri': fields.Url('task')
 }
 
-privateCloudIp = "http://3.135.123.239:8080"
+dbConnectorIp = str(os.environ['dbConnectorIp'])
+
+privateCloudIp = "http://"+dbConnectorIp+":8080"
 
 
 class TaskListAPI(Resource):
